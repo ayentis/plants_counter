@@ -3,6 +3,61 @@ import numpy as np
 import os
 from PIL import Image
 
+
+def show_screen(img):
+    cv2.imshow('contours', img)  # выводим итоговое изображение в окно
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+
+
+def delete_noise(img):
+    kernel_size = (2, 2)  # should roughly have the size of the elements you want to remove
+    kernel_el = cv2.getStructuringElement(cv2.MORPH_RECT, kernel_size)
+    eroded = cv2.erode(img, kernel_el, (-1, -1))
+    cleaned_img = cv2.dilate(eroded, kernel_el, (-1, -1))
+
+    return cleaned_img
+
+
+
+
+img = cv2.imread(r"./source/green_spots.jpeg")
+
+greenLower = np.array([50, 100, 0], dtype = "uint8")
+greenUpper = np.array([120, 255, 120], dtype = "uint8")
+green = cv2.inRange(img, greenLower, greenUpper)
+# green = delete_noise(green)
+# show_screen(green)
+
+hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+hsv_min = np.array((36, 24, 66), np.uint8)
+hsv_max = np.array((78, 255, 255), np.uint8)
+
+mask = cv2.inRange(hsv, hsv_min, hsv_max)
+
+cleaned_mask = delete_noise(mask)
+# cleaned_mask = mask
+
+# ищем контуры и складируем их в переменную contours
+# contours, hierarchy = cv2.findContours(mask.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+contours, hierarchy = cv2.findContours(cleaned_mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+print(len(contours))
+# отображаем контуры поверх изображения
+cv2.drawContours(img, contours, -1, (255, 0, 0), 3, cv2.LINE_AA, hierarchy, 1)
+
+show_screen(img)
+
+print("finish")
+
+# imask = mask > 0
+# green = np.zeros_like(img, np.uint8)
+#
+# green[imask] = img[imask]
+#
+# cv2.imwrite(r"./source/green.jpg", green)
+#
+
 # for en in os.environ:
 #     print(en , os.environ[en])
 
@@ -17,38 +72,6 @@ from PIL import Image
 # img = np.array(mat)
 #
 # print("end")
-
-img = cv2.imread(r"./source/image1.jpg")
-
-hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-
-hsv_min = np.array((36, 24, 66), np.uint8)
-hsv_max = np.array((78, 255, 255), np.uint8)
-
-mask = cv2.inRange(hsv, hsv_min, hsv_max)
-
-# cv2.imshow('result', mask)
-# ch = cv2.waitKey(5000)
-
-# ищем контуры и складируем их в переменную contours
-contours, hierarchy = cv2.findContours(mask.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-print(len(contours))
-# отображаем контуры поверх изображения
-cv2.drawContours(img, contours, -1, (255, 0, 0), 3, cv2.LINE_AA, hierarchy, 1)
-cv2.imshow('contours', img)  # выводим итоговое изображение в окно
-
-cv2.waitKey()
-cv2.destroyAllWindows()
-
-
-# imask = mask > 0
-# green = np.zeros_like(img, np.uint8)
-#
-# green[imask] = img[imask]
-#
-# cv2.imwrite(r"./source/green.jpg", green)
-#
-print("Mask saved")
 
 #
 # print(img.shape)
