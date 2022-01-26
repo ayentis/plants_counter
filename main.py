@@ -11,7 +11,7 @@ def show_screen(img):
 
 
 def delete_noise(img):
-    kernel_size = (2, 2)  # should roughly have the size of the elements you want to remove
+    kernel_size = (5, 5)  # should roughly have the size of the elements you want to remove
     kernel_el = cv2.getStructuringElement(cv2.MORPH_RECT, kernel_size)
     eroded = cv2.erode(img, kernel_el, (-1, -1))
     cleaned_img = cv2.dilate(eroded, kernel_el, (-1, -1))
@@ -19,17 +19,30 @@ def delete_noise(img):
     return cleaned_img
 
 
+def blur(img):
+    # ksize
+    ksize = (15, 15)
+
+    # Using cv2.blur() method
+    image = cv2.blur(img, ksize, cv2.BORDER_DEFAULT)
+    # image = bilateralFilter(img, 9, 75, 75)
+    return image
 
 
-img = cv2.imread(r"./source/green_spots.jpeg")
+img = cv2.imread(r"./source/cabbage.jpeg")
+show_screen(img)
+blured_img = blur(img)
+show_screen(blured_img)
+# greenLower = np.array([50, 100, 0], dtype = "uint8")
+# greenUpper = np.array([120, 255, 120], dtype = "uint8")
+# green = cv2.inRange(blured_img, greenLower, greenUpper)
 
-greenLower = np.array([50, 100, 0], dtype = "uint8")
-greenUpper = np.array([120, 255, 120], dtype = "uint8")
-green = cv2.inRange(img, greenLower, greenUpper)
+# show_screen(green)
+# green = blur(green)
 # green = delete_noise(green)
 # show_screen(green)
 
-hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+hsv = cv2.cvtColor(blured_img, cv2.COLOR_BGR2HSV)
 
 hsv_min = np.array((36, 24, 66), np.uint8)
 hsv_max = np.array((78, 255, 255), np.uint8)
@@ -47,7 +60,7 @@ print(len(contours))
 cv2.drawContours(img, contours, -1, (255, 0, 0), 3, cv2.LINE_AA, hierarchy, 1)
 
 show_screen(img)
-
+cv2.imwrite(r"./source/rez.jpg", img)
 print("finish")
 
 # imask = mask > 0
